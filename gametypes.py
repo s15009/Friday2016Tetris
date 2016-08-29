@@ -202,8 +202,11 @@ class Tetromino(object):
 
 class Board(object):
     STARTING_ZONE_HEIGHT = 4
-    NEXT_X = -5
-    NEXT_Y = 20
+    NEXT_X = -7
+    NEXT_Y = 15
+
+    tmp_x = 0
+    tmp_y = 0
 
     def __init__(self, x, y, grid_width, grid_height, block_size, borad_image, queue):
         self.x = x
@@ -222,6 +225,7 @@ class Board(object):
         self.fallingTetromino = None
         self.spawn_tetromino()
         self.tetrominos = []
+        self.tetromino_tmp = []
 
     # spo-n
     def spawn_tetromino(self):
@@ -233,6 +237,15 @@ class Board(object):
 
     def command_falling_tetromino(self, command):
         self.fallingTetromino.command(command)
+        if command == Input.HOlD:
+            if len(self.tetromino_tmp) == 0:
+                self.tetromino_tmp.append(self.fallingTetromino)
+                self.spawn_tetromino()
+            else:
+                self.tmp_x = self.fallingTetromino.x
+                self.tmp_y = self.fallingTetromino.y
+                self.tetromino_tmp[0], self.fallingTetromino = self.fallingTetromino, self.tetromino_tmp[0]
+                self.fallingTetromino.set_position(self.tmp_x,self.tmp_y)
         if not self.is_valid_position():
             self.fallingTetromino.undo_command(command)
 
@@ -322,6 +335,12 @@ class Board(object):
             self.fallingTetromino.blockBoardCoords)
         self.fallingTetromino.draw(screen_coords)
 
+        if not len(self.tetromino_tmp) == 0:
+            self.tetromino_tmp[0].set_position(self.NEXT_X,self.NEXT_Y)
+            screen_coords = self.grid_coords_to_screen_coords(
+                self.tetromino_tmp[0].blockBoardCoords)
+            self.tetromino_tmp[0].draw(screen_coords)
+
         #この辺に_queueに入っているtetrominoをdraw処理?
         self._queue.draw()
 
@@ -369,7 +388,7 @@ class InfoDisplay(object):
 
 
 class Input(object):
-    TOGGLE_PAUSE, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, ROTATE_CLOCKWISE = range(5)
+    TOGGLE_PAUSE, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, ROTATE_CLOCKWISE, HOlD = range(6)
 
     def __init__(self):
         self.action = None
@@ -377,6 +396,8 @@ class Input(object):
     def process_keypress(self, symbol, modifiers):
         if symbol == pyglet.window.key.SPACE:
             self.action = Input.TOGGLE_PAUSE
+        elif symbol == pyglet.window.key.ENTER:
+            self.action = Input.HOlD
 
     def process_text_motion(self, motion):
         if motion == pyglet.window.key.MOTION_LEFT:
@@ -387,6 +408,7 @@ class Input(object):
             self.action = Input.ROTATE_CLOCKWISE
         elif motion == pyglet.window.key.MOTION_DOWN:
             self.action = Input.MOVE_DOWN
+
 
     def consume(self):
         action = self.action
@@ -459,6 +481,7 @@ class NextTetrominoQueue(object):
     """
     Nextブロックを管理するキュー
     """
+    #位置調整用
     Next_Posi_X = 0
     Next_Posi_Y = 4
     Next_COUNT = 4
