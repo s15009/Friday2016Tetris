@@ -52,9 +52,9 @@ class TetrominoType(object):
             # type S
             TetrominoType(green,
                           {
-                              Tetromino.RIGHT: [(1, 0), (1, 1), (2, 1),
-                                                (2, 2)],
-                              Tetromino.DOWN: [(2, 0), (1, 0), (1, 1), (0, 1)],
+                              Tetromino.RIGHT: [(0, 0), (1, 0), (1, 1),
+                                                (2, 1)],
+                              Tetromino.DOWN: [(0, 1), (1, 1), (1, 0), (2, 0)],
                               Tetromino.LEFT: [(1, 0), (1, 1), (2, 1), (2, 2)],
                               Tetromino.UP: [(2, 0), (1, 0), (1, 1), (0, 1)],
                           }
@@ -237,6 +237,7 @@ class Board(object):
 
     def command_falling_tetromino(self, command):
         self.fallingTetromino.command(command)
+        #Hold function
         if command == Input.HOlD:
             if len(self.tetromino_tmp) == 0:
                 self.tetromino_tmp.append(self.fallingTetromino)
@@ -272,6 +273,7 @@ class Board(object):
         for coord in non_falling_block_coords:
             row_counts[coord[1]] += 1
 
+        #一列ごとのブロックの個数の判定
         full_rows = []
         for row in row_counts:
             if row_counts[row] == self.gridWidth:
@@ -304,7 +306,17 @@ class Board(object):
             if not game_lost:
                 #self.spawn_tetromino() koitu
                 self.spawn_tetromino()
-            num_cleared_rows = len(full_rows)
+            #クリアした列の数で点数を変える
+            judge_rows = len(full_rows)
+            if judge_rows == 4:
+                num_cleared_rows = 8
+            elif judge_rows == 3:
+                num_cleared_rows = 5
+            elif judge_rows == 2:
+                num_cleared_rows = 2
+            elif judge_rows == 1:
+                num_cleared_rows = 1
+            #num_cleared_rows = len(full_rows)
         return num_cleared_rows, game_lost
 
     #tetromino　がスタート地点にいるか確認する奴
@@ -335,6 +347,7 @@ class Board(object):
             self.fallingTetromino.blockBoardCoords)
         self.fallingTetromino.draw(screen_coords)
 
+        #Hold tetromino draw
         if not len(self.tetromino_tmp) == 0:
             self.tetromino_tmp[0].set_position(self.NEXT_X,self.NEXT_Y)
             screen_coords = self.grid_coords_to_screen_coords(
@@ -484,7 +497,7 @@ class NextTetrominoQueue(object):
     #位置調整用
     Next_Posi_X = 0
     Next_Posi_Y = 4
-    Next_COUNT = 4
+    Next_COUNT = 3
 
     def __init__(self, x, y, block_size, set_count):
         self._x = x
