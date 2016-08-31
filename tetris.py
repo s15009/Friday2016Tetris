@@ -10,7 +10,7 @@ BOARD_Y = 30
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
 BLOCK_SIZE = 25
-SET_QUEUE = 3
+SET_QUEUE = 1
 NEXT_X = 600
 NEXT_Y = 300
 
@@ -21,11 +21,11 @@ window.set_vsync(False)
 pyglet.resource.path = ['res']
 backgroundImage = pyglet.resource.image('background.jpg')
 blocksImage = pyglet.resource.image('block2.png')
-BoradImage = pyglet.resource.image('board2.png')
+BoradImage = pyglet.resource.image('examboard.png')
 gametypes.TetrominoType.class_init(blocksImage, BLOCK_SIZE)
 
 ###### init game state ######
-queue = gametypes.NextTetrominoQueue(NEXT_X, NEXT_Y, BLOCK_SIZE, 2)
+queue = gametypes.NextTetrominoQueue(NEXT_X, NEXT_Y, BLOCK_SIZE, SET_QUEUE)
 board = gametypes.Board(BOARD_X, BOARD_Y, GRID_WIDTH, GRID_HEIGHT, BLOCK_SIZE, BoradImage, queue)
 infoDisplay = gametypes.InfoDisplay(window)
 input = gametypes.Input()

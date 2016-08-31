@@ -337,7 +337,7 @@ class Board(object):
 
     #いろいろdrawしてるやつ
     def draw(self):
-        self.BoradImage.blit(self.x, self.y)
+        self.BoradImage.blit(self.x - 3, self.y - 3)
         for tetromino in self.tetrominos:
             screen_coords = self.grid_coords_to_screen_coords(
                 tetromino.blockBoardCoords)
@@ -459,12 +459,14 @@ class Game(object):
         self.paused = False
         self.lost = False
         self.numRowsCleared = 0
-        self.tickSpeed = 0.4
+        self.tickSpeed = 0.8
         self.ticker = GameTick()
 
     def add_rows_cleared(self, rows_cleared):
         self.numRowsCleared += rows_cleared
         self.infoDisplay.set_rows_cleared(self.numRowsCleared)
+        self.SpeedUP(self.numRowsCleared)
+        print(self.tickSpeed)
 
     def toggle_pause(self):
         self.paused = not self.paused
@@ -473,6 +475,7 @@ class Game(object):
     def update(self):
         if self.lost:
             self.infoDisplay.showGameoverLabel = True
+
         else:
             command = self.input.consume()
             if command == Input.TOGGLE_PAUSE:
@@ -483,6 +486,16 @@ class Game(object):
                 if self.ticker.is_tick(self.tickSpeed):
                     rows_cleared, self.lost = self.board.update_tick()
                     self.add_rows_cleared(rows_cleared)
+
+    def SpeedUP(self, score):
+        if score >= 20:
+            self.tickSpeed = 0.1
+        elif score >= 15:
+            self.tickSpeed = 0.2
+        elif score >= 10:
+            self.tickSpeed = 0.4
+        elif score >= 5:
+            self.tickSpeed = 0.6
 
     def draw(self):
         self.backgroundImage.blit(0, 0)
