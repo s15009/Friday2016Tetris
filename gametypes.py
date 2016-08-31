@@ -182,6 +182,7 @@ class Tetromino(object):
             self.move_left()
         elif command == Input.MOVE_LEFT:
             self.move_right()
+        #super rotation key point?
         elif command == Input.ROTATE_CLOCKWISE:
             self.rotate_counterclockwise()
 
@@ -206,6 +207,8 @@ class Board(object):
     STARTING_ZONE_HEIGHT = 4
     NEXT_X = -7
     NEXT_Y = 15
+    playtimecount = 3
+    judge = False
 
     tmp_x = 0
     tmp_y = 0
@@ -255,6 +258,8 @@ class Board(object):
                 self.tetromino_tmp[0], self.fallingTetromino = self.fallingTetromino, self.tetromino_tmp[0]
                 self.fallingTetromino.set_position(self.tmp_x,self.tmp_y)
         if not self.is_valid_position():
+            # if command == Input.ROTATE_CLOCKWISE:
+            #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
             self.fallingTetromino.undo_command(command)
 
     def is_valid_position(self):
@@ -299,12 +304,30 @@ class Board(object):
         for row in grid_rows:
             self.clear_row(row)
 
+    #infinity のための奴
+    def press_key(self, symbol, modifiers):
+        if symbol == pyglet.window.key.LEFT or pyglet.window.key.RIGHT or pyglet.window.key.UP:
+            self.judge = True
+        else:
+            self.judge = False
+    def press_motion(self, motion):
+        if motion == pyglet.window.key.LEFT or pyglet.window.key.RIGHT or pyglet.window.key.UP:
+            self.judge = True
+        else:
+            self.judge = False
+
     # konohen
-    def update_tick(self, judge_command):
+    def update_tick(self):
         num_cleared_rows = 0
         game_lost = False
         #infinite function
-        if judge_command == None:
+        print(self.judge)
+        if self.judge:
+            self.playtimecount = 0
+            self.judge = False
+        self.playtimecount += 1
+        print(self.playtimecount)
+        if self.playtimecount > 2:
             self.fallingTetromino.command(Input.MOVE_DOWN)
         if not self.is_valid_position():
             self.fallingTetromino.undo_command(Input.MOVE_DOWN)
@@ -411,6 +434,7 @@ class InfoDisplay(object):
 
 class Input(object):
     TOGGLE_PAUSE, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, ROTATE_CLOCKWISE, HOlD, Harddrop = range(7)
+    playtime = 0
 
     def __init__(self):
         self.action = None
@@ -495,12 +519,14 @@ class Game(object):
                 if command and command != Input.TOGGLE_PAUSE:
                     self.board.command_falling_tetromino(command)
                 if self.ticker.is_tick(self.tickSpeed):
-                    rows_cleared, self.lost = self.board.update_tick(command)
+                    rows_cleared, self.lost = self.board.update_tick()
                     self.add_rows_cleared(rows_cleared)
 
     #scoreに合わせてスピードアップ
     def SpeedUP(self, score):
-        if score >= 20:
+        if score >= 25:
+            self.tickSpeed = 0.05
+        elif score >= 20:
             self.tickSpeed = 0.1
         elif score >= 15:
             self.tickSpeed = 0.2

@@ -35,12 +35,14 @@ game = gametypes.Game(board, infoDisplay, input, backgroundImage)
 @window.event
 def on_key_press(symbol, modifiers):
     input.process_keypress(symbol, modifiers)
+    board.press_key(symbol, modifiers)
 
 
 
 @window.event
 def on_text_motion(motion):
     input.process_text_motion(motion)
+    board.press_motion(motion)
 
 
 @window.event
