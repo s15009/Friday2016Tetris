@@ -172,6 +172,8 @@ class Tetromino(object):
             self.move_left()
         elif command == Input.ROTATE_CLOCKWISE:
             self.rotate_clockwise()
+        # elif command == Input.Harddrop:
+        #     print("harddrop")
 
     def undo_command(self, command):
         if command == Input.MOVE_DOWN:
@@ -237,6 +239,11 @@ class Board(object):
 
     def command_falling_tetromino(self, command):
         self.fallingTetromino.command(command)
+        # Harddrop function
+        if command == Input.Harddrop:
+            while self.is_valid_position():
+                self.fallingTetromino.command(Input.MOVE_DOWN)
+            self.fallingTetromino.move_up()
         #Hold function
         if command == Input.HOlD:
             if len(self.tetromino_tmp) == 0:
@@ -401,7 +408,7 @@ class InfoDisplay(object):
 
 
 class Input(object):
-    TOGGLE_PAUSE, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, ROTATE_CLOCKWISE, HOlD = range(6)
+    TOGGLE_PAUSE, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, ROTATE_CLOCKWISE, HOlD, Harddrop = range(7)
 
     def __init__(self):
         self.action = None
@@ -411,6 +418,8 @@ class Input(object):
             self.action = Input.TOGGLE_PAUSE
         elif symbol == pyglet.window.key.ENTER:
             self.action = Input.HOlD
+        elif symbol == pyglet.window.key.PAGEDOWN:
+            self.action = Input.Harddrop
 
     def process_text_motion(self, motion):
         if motion == pyglet.window.key.MOTION_LEFT:
@@ -525,7 +534,7 @@ class NextTetrominoQueue(object):
         Tetrominoをset_countセット作ってシャッフルしてキューにぶち込む
         """
         tetromino_type_set = list(TetrominoType.TYPES[:] * self._set_count)
-        for a in range(3):
+        for a in range(2):
             random.shuffle(tetromino_type_set)
 
         for tetromino_type in tetromino_type_set:
