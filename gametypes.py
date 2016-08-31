@@ -300,10 +300,12 @@ class Board(object):
             self.clear_row(row)
 
     # konohen
-    def update_tick(self):
+    def update_tick(self, judge_command):
         num_cleared_rows = 0
         game_lost = False
-        self.fallingTetromino.command(Input.MOVE_DOWN)
+        #infinite function
+        if judge_command == None:
+            self.fallingTetromino.command(Input.MOVE_DOWN)
         if not self.is_valid_position():
             self.fallingTetromino.undo_command(Input.MOVE_DOWN)
             self.tetrominos.append(self.fallingTetromino)
@@ -475,7 +477,7 @@ class Game(object):
         self.numRowsCleared += rows_cleared
         self.infoDisplay.set_rows_cleared(self.numRowsCleared)
         self.SpeedUP(self.numRowsCleared)
-        print(self.tickSpeed)
+        #print(self.tickSpeed)
 
     def toggle_pause(self):
         self.paused = not self.paused
@@ -493,9 +495,10 @@ class Game(object):
                 if command and command != Input.TOGGLE_PAUSE:
                     self.board.command_falling_tetromino(command)
                 if self.ticker.is_tick(self.tickSpeed):
-                    rows_cleared, self.lost = self.board.update_tick()
+                    rows_cleared, self.lost = self.board.update_tick(command)
                     self.add_rows_cleared(rows_cleared)
 
+    #scoreに合わせてスピードアップ
     def SpeedUP(self, score):
         if score >= 20:
             self.tickSpeed = 0.1
