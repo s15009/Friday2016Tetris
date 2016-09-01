@@ -205,9 +205,10 @@ class Board(object):
     STARTING_ZONE_HEIGHT = 4
     NEXT_X = -7
     NEXT_Y = 15
-    playtimecount = 3
+    playtimecount = 2
     judge = False
     Hold_count = 0
+    Hard_judge = False
 
     tmp_x = 0
     tmp_y = 0
@@ -244,12 +245,15 @@ class Board(object):
         self.Hold_count = 0
 
     def command_falling_tetromino(self, command):
-        self.fallingTetromino.command(command)
+        if not self.Hard_judge:
+            self.fallingTetromino.command(command)
         # Harddrop function
         if command == Input.Harddrop:
             while self.is_valid_position():
                 self.fallingTetromino.command(Input.MOVE_DOWN)
             self.fallingTetromino.move_up()
+            self.playtimecount += 2
+            self.Hard_judge = True
         #Hold function
         if command == Input.HOlD and self.Hold_count == 0:
             if len(self.tetromino_tmp) == 0:
@@ -267,45 +271,57 @@ class Board(object):
             #     self.SRS_tmp_y = self.fallingTetromino.y
             #     if self.is_rotate():
             #         pass
-
+            # else:
             self.fallingTetromino.undo_command(command)
 
     # def is_rotate(self):
     #     # X軸を　-1　して回転判定
+    #     print("x-1")
+    #     self.fallingTetromino.set_position(self.fallingTetromino.x - 1, self.fallingTetromino.y)
     #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
-    #     self.fallingTetromino.set_position(self.x - 1, self.y)
-    #     if not self.is_valid_position():
+    #     if self.is_valid_position():
+    #         print("kita")
     #         return True
     #     else:
-    #         print("-1")
+    #         self.fallingTetromino.undo_command(Input.ROTATE_CLOCKWISE)
+    #         self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
     #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
     #
     #     # X軸を　+1 して回転判定
+    #     print("x+1")
+    #     self.fallingTetromino.set_position(self.fallingTetromino.x + 1, self.fallingTetromino.y)
     #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
-    #     self.fallingTetromino.set_position(self.x + 1, self.y)
-    #     if not self.is_valid_position():
+    #     if self.is_valid_position():
+    #         print("kita")
     #         return True
     #     else:
-    #         print("+1")
+    #         self.fallingTetromino.undo_command(Input.ROTATE_CLOCKWISE)
+    #         self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
     #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
     #
     #     # Y軸を　-1 して回転判定
+    #     print("y-1")
+    #     self.fallingTetromino.set_position(self.fallingTetromino.x, self.fallingTetromino.y - 1)
     #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
-    #     self.fallingTetromino.set_position(self.x, self.y - 1)
-    #     if not self.is_valid_position():
+    #     if self.is_valid_position():
+    #         print("kita")
     #         return True
     #     else:
-    #         print("-1")
+    #         self.fallingTetromino.undo_command(Input.ROTATE_CLOCKWISE)
+    #         self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
     #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
     #
     #     # Y軸を +1 して回転判定
+    #     print("y+1")
+    #     self.fallingTetromino.set_position(self.fallingTetromino.x, self.fallingTetromino.y + 1)
     #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
-    #     self.fallingTetromino.set_position(self.x, self.y + 1)
-    #     if not self.is_valid_position():
+    #     if self.is_valid_position():
+    #         print("kita")
     #         return True
     #     else:
+    #         self.fallingTetromino.undo_command(Input.ROTATE_CLOCKWISE)
+    #         self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
     #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
-    #         print("+1")
     #         return False
 
     def is_valid_position(self):
@@ -352,12 +368,12 @@ class Board(object):
 
     #infinity のための奴
     def press_key(self, symbol, modifiers):
-        if symbol == pyglet.window.key.LEFT or pyglet.window.key.RIGHT or pyglet.window.key.UP:
+        if symbol == (pyglet.window.key.LEFT or pyglet.window.key.RIGHT or pyglet.window.key.UP):
             self.judge = True
         else:
             self.judge = False
     def press_motion(self, motion):
-        if motion == pyglet.window.key.LEFT or pyglet.window.key.RIGHT or pyglet.window.key.UP:
+        if motion == (pyglet.window.key.LEFT or pyglet.window.key.RIGHT or pyglet.window.key.UP):
             self.judge = True
         else:
             self.judge = False
@@ -367,12 +383,11 @@ class Board(object):
         num_cleared_rows = 0
         game_lost = False
         #infinite function
-        print(self.judge)
         if self.judge:
             self.playtimecount = 0
             self.judge = False
         self.playtimecount += 1
-        print(self.playtimecount)
+        #print(self.playtimecount)
         if self.playtimecount > 2:
             self.fallingTetromino.command(Input.MOVE_DOWN)
         if not self.is_valid_position():
@@ -381,8 +396,8 @@ class Board(object):
             full_rows = self.find_full_rows()
             self.clear_rows(full_rows)
             game_lost = self.is_in_start_zone(self.fallingTetromino)
+            self.Hard_judge = False
             if not game_lost:
-                #self.spawn_tetromino() koitu
                 self.spawn_tetromino()
             #クリアした列の数で点数を変える
             judge_rows = len(full_rows)
