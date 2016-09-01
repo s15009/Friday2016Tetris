@@ -172,8 +172,6 @@ class Tetromino(object):
             self.move_left()
         elif command == Input.ROTATE_CLOCKWISE:
             self.rotate_clockwise()
-        # elif command == Input.Harddrop:
-        #     print("harddrop")
 
     def undo_command(self, command):
         if command == Input.MOVE_DOWN:
@@ -209,9 +207,13 @@ class Board(object):
     NEXT_Y = 15
     playtimecount = 3
     judge = False
+    Hold_count = 0
 
     tmp_x = 0
     tmp_y = 0
+
+    SRS_tmp_x = 0
+    SRS_tmp_y = 0
 
     def __init__(self, x, y, grid_width, grid_height, block_size, borad_image, queue):
         self.x = x
@@ -239,6 +241,7 @@ class Board(object):
         # self.nextTetromino.set_position(Board.NEXT_X, Board.NEXT_Y)
         self.fallingTetromino = self._queue.next()
         self.fallingTetromino.set_position(self.spawnX, self.spawnY)
+        self.Hold_count = 0
 
     def command_falling_tetromino(self, command):
         self.fallingTetromino.command(command)
@@ -248,7 +251,7 @@ class Board(object):
                 self.fallingTetromino.command(Input.MOVE_DOWN)
             self.fallingTetromino.move_up()
         #Hold function
-        if command == Input.HOlD:
+        if command == Input.HOlD and self.Hold_count == 0:
             if len(self.tetromino_tmp) == 0:
                 self.tetromino_tmp.append(self.fallingTetromino)
                 self.spawn_tetromino()
@@ -256,11 +259,54 @@ class Board(object):
                 self.tmp_x = self.fallingTetromino.x
                 self.tmp_y = self.fallingTetromino.y
                 self.tetromino_tmp[0], self.fallingTetromino = self.fallingTetromino, self.tetromino_tmp[0]
-                self.fallingTetromino.set_position(self.tmp_x,self.tmp_y)
+                self.fallingTetromino.set_position(self.spawnX,self.spawnY)
+            self.Hold_count += 1
         if not self.is_valid_position():
             # if command == Input.ROTATE_CLOCKWISE:
-            #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
+            #     self.SRS_tmp_x = self.fallingTetromino.x
+            #     self.SRS_tmp_y = self.fallingTetromino.y
+            #     if self.is_rotate():
+            #         pass
+
             self.fallingTetromino.undo_command(command)
+
+    # def is_rotate(self):
+    #     # X軸を　-1　して回転判定
+    #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
+    #     self.fallingTetromino.set_position(self.x - 1, self.y)
+    #     if not self.is_valid_position():
+    #         return True
+    #     else:
+    #         print("-1")
+    #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
+    #
+    #     # X軸を　+1 して回転判定
+    #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
+    #     self.fallingTetromino.set_position(self.x + 1, self.y)
+    #     if not self.is_valid_position():
+    #         return True
+    #     else:
+    #         print("+1")
+    #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
+    #
+    #     # Y軸を　-1 して回転判定
+    #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
+    #     self.fallingTetromino.set_position(self.x, self.y - 1)
+    #     if not self.is_valid_position():
+    #         return True
+    #     else:
+    #         print("-1")
+    #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
+    #
+    #     # Y軸を +1 して回転判定
+    #     self.fallingTetromino.command(Input.ROTATE_CLOCKWISE)
+    #     self.fallingTetromino.set_position(self.x, self.y + 1)
+    #     if not self.is_valid_position():
+    #         return True
+    #     else:
+    #         self.fallingTetromino.set_position(self.SRS_tmp_x, self.SRS_tmp_y)
+    #         print("+1")
+    #         return False
 
     def is_valid_position(self):
         non_falling_block_coords = []
